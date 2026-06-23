@@ -4,6 +4,61 @@ const { connect } = require('./db');
 const { ObjectId } = require('mongodb');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+
+function generateAccessToken(id) {
+    // arg 1: the claims, or the payload
+    // arg 2: the hashing key
+    // arg 3: configuration options
+    return jwt.sign({
+        "user_id": id,
+        "role": "user"
+    }, process.env.TOKEN_SECRET, {
+        "expiresIn":"3w"
+    })
+}
+
+// a middleware function happens before the routes is called
+// the next parameter will refer to the next middleware
+// or if there is no more middleware, then the actual route itself
+
+function verifyToken(req, res, next) {
+
+    // extract out the token from the Authorization
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+         const token = authHeader.split(" ")[1];
+
+        if (token) {
+
+            // verify the token's claims and expiry matches the signature
+            jwt.verify(token, process.env.TOKEN_SECRET, function(err,claims){
+                if (err) {
+                    res.status(400).json({
+                        "message":"Token invalid or expired"
+                    })
+                } else {
+                    // save in the request the logged in user's information
+                    req.user = claims;
+                    next();
+                }
+            })
+
+        } else {
+            res.status(400).json({
+                'message':"Token not found"
+            })
+        }
+
+    } else {
+        res.status(400).json({
+            'message':"Authroization headers not found"
+        })
+    }
+   
+
+   
+}
 
 const app = express();
 
@@ -143,18 +198,62 @@ async function main() {
     // email: String
     // password: String} 
     //
-    app.post('/api/users', async function(req,res){
+    app.post('/api/users', async function (req, res) {
         const result = await db.collection("users").insertOne({
             email: req.body.email,
-            password:  await bcrypt.hash(req.body.password, 12)
+            password: await bcrypt.hash(req.body.password, 12)
         });
         res.json({
-            message:"New user has been created",
+            message: "New user has been created",
             userId: result.insertedId
         })
     })
 
+    app.post('/api/login', async function (req, res) {
+        const email = req.body.email;
+        const password = req.body.password;
 
+        // find the user by email
+        const user = await db.collection("users").findOne({
+            "email": email
+        });
+        if (user) {
+            // check if the password matches
+            // bcrypt.compare(<plain password>, <hashed password>)
+            if (await bcrypt.compare(password, user.password)) {
+                // create the JWT and send back
+                const token = generateAccessToken(user._id);
+
+                // create and send back the JWT
+                res.json({
+                    "token": token,
+                    "message":"Login is successful"
+                })
+            } else {
+                res.status(401).json({
+                    "message": "Wrong email or password"
+                })
+            }
+
+        } else {
+            res.status(401).json({
+                "message": "Wrong email or password"
+            })
+        }
+
+    
+    })
+
+
+    app.get('/api/me', [verifyToken], async function(req,res){
+        const user = await db.collection("users").findOne({
+            _id : new ObjectId(req.user.user_id)
+        });
+        delete user.password;
+        res.json({
+            "user": user
+        })
+    })
 
 }
 main();

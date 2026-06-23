@@ -10,8 +10,53 @@ async function main() {
     const db = await connect(process.env.MONGO_URI, "8109_recipes");
 
     // routes will in here
-    app.get("/recipes", async function(req,res){
-        const recipes = await db.collection("recipes").find({}).toArray();
+    
+    // Search for recipes
+    // the req.query can contain following parameters:
+    // name: string pattern for the name
+    // tags: a comma delimited string list, eg. "easy,spicy"
+    app.get("/api/recipes", async function(req,res){
+
+        const criteria = {};
+
+        if (req.query.name) {
+            criteria.name = {
+                $regex: req.query.name,
+                $options:"i"
+            }
+        }
+
+        if (req.query.cuisine) {
+            criteria["cuisine.name"] = {
+                $regex: req.query.cuisine,
+                $options:"i"
+            }
+        }
+
+        if (req.query.tags) {
+            // "easy,spicy".split(",") = ["easy", "spicy"];
+            const wantedTags = req.query.tags.split(",");
+            criteria['tags.name'] = {
+                "$in": wantedTags
+            }
+        }
+
+        // we'll expect req.query.ingredients to be a comma delimited strings
+        // "chicken,flour,eggs".split(",") = ["chicken","flour","eggs"]
+        if (req.query.ingredients) {
+            const ingredientArray = req.query.ingredients.split(",")
+            const regexArray = [];
+
+            for (let ingredient of ingredientArray) {
+                regexArray.push(new RegExp(ingredient, "i"));
+            }
+
+            criteria["ingredients.name"] = {
+                $in: regexArray
+            }
+        }
+
+        const recipes = await db.collection("recipes").find(criteria).toArray();
         res.json({
             recipes: recipes
         })
@@ -20,6 +65,6 @@ async function main() {
 }
 main();
 
-app.listen(3001, function(){
+app.listen(3000, function(){
     console.log("Server has started");
 })

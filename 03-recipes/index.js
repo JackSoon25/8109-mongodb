@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { connect } = require('./db');
 const { ObjectId } = require('mongodb');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const app = express();
@@ -133,6 +134,23 @@ async function main() {
         res.json({
             message: "Successfully updated recipe",
 
+        })
+    })
+
+    // REGISTER A NEW USE
+    // shape of req.body:
+    // {
+    // email: String
+    // password: String} 
+    //
+    app.post('/api/users', async function(req,res){
+        const result = await db.collection("users").insertOne({
+            email: req.body.email,
+            password:  await bcrypt.hash(req.body.password, 12)
+        });
+        res.json({
+            message:"New user has been created",
+            userId: result.insertedId
         })
     })
 

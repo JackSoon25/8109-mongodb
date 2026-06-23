@@ -1,0 +1,55 @@
+{
+  "name": "Spicy Chicken Tacos",
+  "cuisine": "Mexican"
+
+  "prepTime": 20,
+  "cookTime": 15,
+  "servings": 4,
+  "ingredients": [
+    {
+      "name": "chicken breast",
+      "amount": 500,
+      "unit": "g"
+    },
+    {
+      "name": "chilli taco powder seasoning",
+      "amount": 2,
+      "unit": "tbsp"
+    },
+    {
+      "name": "olive oil",
+      "amount": 1,
+      "unit": "tbsp"
+    },
+    {
+      "name": "corn tortillas",
+      "amount": 8,
+      "unit": "pieces"
+    },
+    {
+      "name": "onion",
+      "amount": 1,
+      "unit": "medium"
+    },
+    {
+      "name": "cilantro",
+      "amount": 0.5,
+      "unit": "cup"
+    },
+    {
+      "name": "lime",
+      "amount": 1,
+      "unit": "whole"
+    }
+  ],
+  "instructions": [
+    "Season chicken with taco seasoning and olive oil.",
+    "Cook chicken in a skillet over medium heat until fully cooked (about 10-12 minutes).",
+    "Warm tortillas in a dry pan or microwave.",
+    "Shred or slice the cooked chicken.",
+    "Assemble tacos: place chicken on tortillas, top with chopped onion, cilantro, and a squeeze of lime."
+  ],
+  "tags": [
+          "quick","easy"
+    ]
+}

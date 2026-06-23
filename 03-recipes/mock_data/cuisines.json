@@ -1,0 +1,20 @@
+[
+    {
+        "_id": {
+            "$oid":"6a39ec7fe7f82378cbb76c52"
+        },
+        "name":"Italian"
+    },
+    {
+        "_id": {
+            "$oid":"6a39ecc70783d4aa1aeba9b9"
+        },
+        "name":"Indian"
+    },
+       {
+        "_id": {
+            "$oid":"6a39ecd9481557110f448897"
+        },
+        "name":"Mexican"
+    }
+]
